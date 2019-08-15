@@ -1,3 +1,14 @@
+###
+#
+# This script loops through the video URLs in the guest list CSV file and downloads the
+# video comments using the scraper available at http://ytcomments.klostermann.ca.
+#
+# It can take a long time to run for the videos with a lot of comments. It will only scrape
+# comments for videos not done yet, so if it gets interrupted it will pick up where it left
+# off the next time it runs.
+#
+###
+
 from selenium import webdriver
 from selenium.common.exceptions import ElementNotVisibleException
 import time

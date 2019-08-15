@@ -1,3 +1,12 @@
+###
+#
+# This script loops through all comments for every guest and computes the compound
+# sentiment score using the VADER implementation in nltk. It adds the sentiment score
+# of each comment to the comments JSON file and it adds some basic aggregate metrics
+# to the guest list CSV file for each guest.
+#
+###
+
 import json
 import os
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -12,6 +21,7 @@ guest_df = utils.load_guest_list_file()
 sia = SentimentIntensityAnalyzer()
 
 for i, row in guest_df.iterrows():
+
     # don't do anything if there's no video ID or the comments haven't been scraped
     if (row['video_id'] == '') or (row['done'] not in [1, '1']):
         continue
@@ -22,10 +32,19 @@ for i, row in guest_df.iterrows():
     comments = json.load(open(comment_file, 'r'))
     n_comments = len(comments)
 
-    # get sentiment scores for all comments
-    scores = [sia.polarity_scores(comment['commentText'])['compound']
-              for comment in comments
-              if 'commentText' in comment]
+    scores = []
+
+    # loop through comments and get sentiment scores
+    for comment in comments:
+
+        # if comment has text, calculate sentiment score, add to JSON, and append to scores list
+        if 'commentText' in comment:
+            score = sia.polarity_scores(comment['commentText'])['compound']
+            comment['sentiment_score'] = score
+            scores.append(score)
+
+    # write the JSON file to save the sentiment scores
+    json.dump(comments, open(comment_file, 'w'), indent=2)
 
     # compute basic stats about score distribution
     mean_score = np.mean(scores)

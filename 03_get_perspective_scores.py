@@ -1,3 +1,18 @@
+###
+#
+# This script loops through all comments for every guest and computes toxicity and
+# severe toxicity scores for each comment using the Google Perspective API. It adds
+# the scores to the comments JSON file and it adds some basic aggregate metrics
+# to the guest list CSV file for each guest.
+#
+# This script takes a long time to run because the API has an hourly usage limit. I
+# alleviated that issue a bit by creating 20 different API keys and rotating through
+# them, but it still took multiple days to finish computing scores for all comments.
+# The script should be fairly robust about picking up where it left off if it gets
+# interrupted and needs to be run again.
+#
+###
+
 import json
 import os
 import numpy as np
@@ -48,7 +63,6 @@ def compute_perspective_scores(apis, comment_text, which_api=0, retry_rate=0.5, 
     # select the API out of the list
     if not isinstance(apis, list):
         apis = [apis]
-
     api = apis[which_api]
 
     # attempt to get scores from Perspective API; if quota is exceeded, wait and try again with the next API

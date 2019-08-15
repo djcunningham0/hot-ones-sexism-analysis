@@ -1,3 +1,10 @@
+###
+#
+# This script uses the YouTube API to get the video ID and URL for each guest in the
+# guest list CSV file. It adds the video ID and URL to the CSV file.
+#
+###
+
 from googleapiclient import discovery
 import pandas as pd
 from googleapiclient.errors import HttpError

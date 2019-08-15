@@ -1,23 +1,34 @@
 import pandas as pd
 import os
+import string
 
 
 # define some file and directory names
 guest_list_file = './guest_list.csv'
 comment_dir = './comments'
+data_dir = './data'
 youtube_api_key_file = './youtube_api_key.txt'
 perspective_api_key_file = './perspective_api_key.txt'
 perspective_api_key_file_2 = './perspective_api_key_2.txt'
 
 
-def load_guest_list_file(file=guest_list_file):
+def load_guest_list_file(file=guest_list_file, apply_filters=False):
     """
     Read the guest list CSV file into a pandas dataframe.
 
     :param file: file path for guest list CSV file
+    :param apply_filters: if True, remove unscraped and special videos (holiday special, Colbert)
     :return: pandas dataframe
     """
-    return pd.read_csv(file).fillna('')
+    df = pd.read_csv(file).fillna('')
+    
+    if apply_filters:
+        df = df[(df['video_id'] != '') &
+                (df['done'].isin([1, '1'])) &
+                (~df['guest'].isin(['holiday special', 'Stephen Colbert']))
+               ]
+    
+    return df
 
 
 def save_guest_list_file(df, file=guest_list_file):
@@ -73,3 +84,31 @@ def remove_duplicate_files(comment_dir=comment_dir):
     for file in dup_files:
         os.rename(os.path.join(comment_dir, file),
                   os.path.join(comment_dir, file.split(' (')[0] + file.split(')')[-1]))
+
+
+def scrub_names(df, comments_col='comments', name_token='<name>'):
+    """
+    For each guest, replace the guest's name with a generic '<name>' token. Tokens to replace for each guest are
+    specfied in the 'name_filter' column of the input CSV file.
+
+    :param df: guest dataframe with a column containing concatenated comments (a string)
+    :return: same dataframe with names substituted in the comments
+    """
+    if comments_col not in df:
+        raise KeyError("Dataframe must have a 'comments' column")
+
+    for i, row in df.iterrows():
+        # look for tokens specified in CSV, plus those tokens including some basic punctuation
+        raw_names = [row['guest'].lower()] + row['name_filter'].split(', ')
+        names = raw_names + [x + "'s" for x in raw_names]
+        names += [x + y for y in string.punctuation for x in raw_names]
+        names += [y + x for y in string.punctuation for x in raw_names]
+
+        comments = row[comments_col]
+        scrubbed_comments = comments.split(' ')
+        scrubbed_comments = [name_token if x.lower() in names else x for x in scrubbed_comments]
+        scrubbed_comments = ' '.join(scrubbed_comments)
+
+        df.loc[i, comments_col] = scrubbed_comments
+
+    return df

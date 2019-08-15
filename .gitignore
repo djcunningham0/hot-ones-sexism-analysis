@@ -1,0 +1,8 @@
+youtube_api_key.txt
+perspective_api_key.txt
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+*.json
+*.pickle
+.Rproj.user
