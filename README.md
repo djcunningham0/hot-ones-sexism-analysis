@@ -6,7 +6,7 @@ for evidence of sexism in comments on videos featuring women.
 ## Results
 
 I think there is moderate evidence of sexism. I wrote a summary of my findings in a post on Medium: 
-https://medium.com/@djcunningham0/are-hot-ones-viewers-sexist-2a1373b6b69
+https://towardsdatascience.com/are-hot-ones-viewers-sexist-2a1373b6b69
 
 The `data_for_writeup.ipynb` Jupyter notebook contains most of the data and visualizations from the
 Medium post.
